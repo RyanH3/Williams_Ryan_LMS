@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class LibraryManager {
     public static void main(String[] args){
@@ -28,7 +29,8 @@ public class LibraryManager {
                         break;
                     }
                     catch (FileNotFoundException fnf) {
-                        System.out.println("File not found");
+                        System.out.println("File not found.");
+                        pause();
                         break;
                     }
                 case 3:
@@ -55,6 +57,7 @@ public class LibraryManager {
         int incompletes = 0;
         int invalids = 0;
         int duplicates = 0;
+        int addedBooks = 0;
         boolean duplicateFlag;
 
         while (myScanner.hasNextLine()) {
@@ -66,9 +69,12 @@ public class LibraryManager {
                 incompletes++;
                 continue;
             }
-            // skip and take note of entries with invalid IDs
+            // skip and take note of entries with IDs that are not numbers or negative
             try {
                 Integer.parseInt(newBookItems[0]);
+                if (Integer.parseInt(newBookItems[0]) < 0) {
+                    throw new NumberFormatException();
+                }
             }
             catch (NumberFormatException nfe) {
                 invalids++;
@@ -91,13 +97,16 @@ public class LibraryManager {
             String newBookAuthor = newBookItems[2];
             Book newBook = new Book(newBookId, newBookTitle, newBookAuthor);
             lib.add(newBook);
+            addedBooks++;
         }
 
         // make "entry" singular or plural based on the amount
         System.out.println("Process completed. " +
+                addedBooks + (addedBooks == 1 ? " book added. " : " books added. ") +
                 incompletes + (incompletes == 1 ? " incomplete entry, " : " incomplete entries, ") +
                 invalids + (invalids == 1 ? " invalid ID, and " : " invalid IDs, and ") +
                 duplicates + (duplicates == 1 ? " duplicate entry found." : " duplicate entries found."));
+        pause();
         return lib;
     }
 
@@ -108,11 +117,16 @@ public class LibraryManager {
      * Returns: int
      */
     static int menu() {
-        System.out.println("1. Show\n" +
-                "2. Add\n" +
-                "3. Remove\n" +
-                "4. Quit\n\n" +
-                "Press the number of the option that you want to select then press ENTER.");
+        System.out.println("""
+                ========================
+                ==     Main  Menu     ==
+                ========================
+                Welcome to the Library Manager!
+                Press the number of the option that you want to select, then press ENTER.
+                1. Show
+                2. Add
+                3. Remove
+                4. Quit""");
 
         // makes sure the user only inputted an integer from 1-4
         boolean flag = true;
@@ -127,10 +141,22 @@ public class LibraryManager {
                 flag = false;
             }
             catch (InputMismatchException ime) {
-                System.out.println("Please type a number 1-4.");
+                System.out.println("Please type a number from 1 to 4.");
             }
         }
         return choice;
+    }
+
+    /*
+     * Method Name: pause
+     * Purpose: Pauses the system until the user presses ENTER
+     * Parameters: none
+     * Returns: nothing
+     */
+    public static void pause() {
+        Scanner myScanner = new Scanner(System.in);
+        System.out.println("\nPress ENTER to continue...");
+        myScanner.nextLine();
     }
 
     /*
@@ -143,9 +169,14 @@ public class LibraryManager {
         if (lib.isEmpty()) {
             System.out.println("There are no books in the library.");
         }
+
+        // sorts the list before displaying it
+        lib.sort(Comparator.comparing(Book::getId));
+
         for (Book book : lib) {
             book.print();
         }
+        pause();
     }
 
     /*
@@ -157,6 +188,7 @@ public class LibraryManager {
     static ArrayList<Book> removeBook(ArrayList<Book> lib) {
         if(lib.isEmpty()) {
             System.out.println("There are no books in the library.");
+            pause();
             return lib;
         }
 
@@ -171,6 +203,7 @@ public class LibraryManager {
             }
             catch (InputMismatchException ime) {
                 System.out.println("Please type a whole number");
+                pause();
             }
         }
         return lib;

@@ -11,7 +11,7 @@ public class Book {
     private String author;
 
     public Book() {
-        this.id = 999;
+        this.id = -1;
         this.title = "Unknown title";
         this.author = "Unknown Author";
     }
